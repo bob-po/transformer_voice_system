@@ -49,8 +49,8 @@
 
 1. 克隆项目到本地：
 ```bash
-git clone [项目地址]
-cd [项目目录]
+git clone https://github.com/bob-po/transformer_voice_system.git
+cd transformer_voice_system
 ```
 
 2. 安装 ffmpeg（用于音频处理）：
