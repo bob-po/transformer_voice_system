@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多语言语音翻译系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-4xl font-bold text-center mb-8 text-gray-800">
+                多语言语音翻译系统
+            </h1>
+            
+            <!-- 语音识别部分 -->
+            <div class="glass-effect rounded-lg p-6 mb-8">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">语音识别</h2>
+                <div class="flex flex-col space-y-4">
+                    <div class="flex items-center space-x-4">
+                        <select id="recognitionLang" class="rounded-md p-2 border">
+                            {% for code, name in languages.items() %}
+                            <option value="{{ code }}">{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                        <button id="startRecording" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+                            <i class="fas fa-microphone mr-2"></i>开始录音
+                        </button>
+                        <button id="stopRecording" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600" disabled>
+                            <i class="fas fa-stop mr-2"></i>停止录音
+                        </button>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <label for="audioFile" class="flex-1">
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 relative" id="dropZoneContainer">
+                                <div class="upload-success hidden absolute inset-0 bg-green-50 bg-opacity-90 flex items-center justify-center rounded-lg">
+                                    <div class="text-center">
+                                        <i class="fas fa-check-circle text-4xl text-green-500 mb-2"></i>
+                                        <p class="text-green-600">文件上传成功</p>
+                                    </div>
+                                </div>
+                                <i class="fas fa-file-audio text-2xl text-gray-400 mb-2"></i>
+                                <p class="text-sm text-gray-500">点击上传WAV文件或拖拽到此处</p>
+                                <p class="text-xs text-gray-400 mt-1" id="selectedFileName"></p>
+                            </div>
+                            <input type="file" id="audioFile" accept=".wav" class="hidden" />
+                        </label>
+                    </div>
+                    <div class="bg-white p-4 rounded-md">
+                        <p class="text-gray-700">识别结果：</p>
+                        <p id="recognitionResult" class="mt-2 text-gray-900"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 声纹识别部分 -->
+            <div class="glass-effect rounded-lg p-6 mb-8">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">声纹识别</h2>
+                <div class="flex flex-col space-y-4">
+                    <!-- 声纹注册部分 -->
+                    <div class="mb-6">
+                        <h3 class="text-xl font-semibold mb-3 text-gray-700">声纹注册</h3>
+                        <div class="flex items-center space-x-4 mb-3">
+                            <input type="text" id="speakerName" class="flex-1 rounded-md p-2 border" placeholder="输入说话人姓名">
+                            <button id="registerSpeakerBtn" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
+                                <i class="fas fa-user-plus mr-2"></i>注册声纹
+                            </button>
+                        </div>
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 relative" id="registerAudioContainer">
+                            <div class="register-upload-success hidden absolute inset-0 bg-green-50 bg-opacity-90 flex items-center justify-center rounded-lg">
+                                <div class="text-center">
+                                    <i class="fas fa-check-circle text-4xl text-green-500 mb-2"></i>
+                                    <p class="text-green-600">文件上传成功</p>
+                                </div>
+                            </div>
+                            <i class="fas fa-microphone text-2xl text-gray-400 mb-2"></i>
+                            <p class="text-sm text-gray-500">上传注册音频</p>
+                            <p class="text-xs text-gray-400 mt-1" id="registerAudioName"></p>
+                        </div>
+                        <input type="file" id="registerAudioInput" accept="audio/*" class="hidden" />
+                    </div>
+
+                    <!-- 声纹识别部分 -->
+                    <div>
+                        <h3 class="text-xl font-semibold mb-3 text-gray-700">声纹识别</h3>
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 relative" id="identifyAudioContainer">
+                            <div class="identify-upload-success hidden absolute inset-0 bg-green-50 bg-opacity-90 flex items-center justify-center rounded-lg">
+                                <div class="text-center">
+                                    <i class="fas fa-check-circle text-4xl text-green-500 mb-2"></i>
+                                    <p class="text-green-600">文件上传成功</p>
+                                </div>
+                            </div>
+                            <i class="fas fa-microphone text-2xl text-gray-400 mb-2"></i>
+                            <p class="text-sm text-gray-500">上传待识别音频</p>
+                            <p class="text-xs text-gray-400 mt-1" id="identifyAudioName"></p>
+                        </div>
+                        <input type="file" id="identifyAudioInput" accept="audio/*" class="hidden" />
+                        <button id="identifySpeakerBtn" class="mt-3 bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600">
+                            <i class="fas fa-fingerprint mr-2"></i>识别声纹
+                        </button>
+                    </div>
+
+                    <!-- 结果显示部分 -->
+                    <div class="bg-white p-4 rounded-md">
+                        <p class="text-gray-700 mb-2">识别结果：</p>
+                        <div id="identificationResult" class="text-gray-900"></div>
+                        <div class="mt-2">
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div id="confidenceBar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-1" id="confidenceScore"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 文本翻译部分 -->
+            <div class="glass-effect rounded-lg p-6 mb-8">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">文本翻译</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <select id="srcLang" class="w-full rounded-md p-2 border mb-2">
+                            {% for code, name in languages.items() %}
+                            <option value="{{ code }}">{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                        <textarea id="srcText" class="w-full h-32 p-2 border rounded-md" placeholder="输入要翻译的文本"></textarea>
+                    </div>
+                    <div>
+                        <select id="tgtLang" class="w-full rounded-md p-2 border mb-2">
+                            {% for code, name in languages.items() %}
+                            <option value="{{ code }}">{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div id="tgtText" class="w-full h-32 p-2 border rounded-md bg-white"></div>
+                    </div>
+                </div>
+                <button id="translateBtn" class="mt-4 bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600">
+                    <i class="fas fa-language mr-2"></i>翻译
+                </button>
+            </div>
+
+            <!-- 语音合成部分 -->
+            <div class="glass-effect rounded-lg p-6">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">语音合成</h2>
+                <div class="flex flex-col space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <select id="synthesisLang" class="w-full rounded-md p-2 border mb-2">
+                                {% for code, name in languages.items() %}
+                                <option value="{{ code }}">{{ name }}</option>
+                                {% endfor %}
+                            </select>
+                            <select id="voiceStyle" class="w-full rounded-md p-2 border">
+                                <option value="default">默认</option>
+                                <option value="friendly">友好</option>
+                                <option value="cheerful">愉快</option>
+                                <option value="excited">兴奋</option>
+                                <option value="sad">悲伤</option>
+                                <option value="angry">愤怒</option>
+                                <option value="terrified">害怕</option>
+                                <option value="shouting">大声</option>
+                                <option value="whispering">耳语</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="referenceAudio" class="block">
+                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 relative" id="voiceUploadContainer">
+                                    <div class="voice-upload-success hidden absolute inset-0 bg-green-50 bg-opacity-90 flex items-center justify-center rounded-lg">
+                                        <div class="text-center">
+                                            <i class="fas fa-check-circle text-4xl text-green-500 mb-2"></i>
+                                            <p class="text-green-600">音色上传成功</p>
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-microphone text-2xl text-gray-400 mb-2"></i>
+                                    <p class="text-sm text-gray-500">上传参考音色（可选）<br>不上传则使用默认音色</p>
+                                    <p class="text-xs text-gray-400 mt-1" id="referenceFileName"></p>
+                                </div>
+                                <input type="file" id="referenceAudio" accept="audio/*" class="hidden" />
+                            </label>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2 mb-2">
+                        <label class="text-sm text-gray-600">语速调节:</label>
+                        <input type="range" id="speedControl" min="0.5" max="2.0" step="0.1" value="1.0" class="w-full">
+                        <span id="speedValue" class="text-sm text-gray-600">1.0</span>
+                    </div>
+                    <textarea id="synthesisText" class="w-full h-24 p-2 border rounded-md" placeholder="输入要合成的文本"></textarea>
+                    <div class="flex items-center space-x-4">
+                        <button id="synthesisBtn" class="flex-1 bg-purple-500 text-white px-6 py-2 rounded-md hover:bg-purple-600">
+                            <i class="fas fa-volume-up mr-2"></i>合成语音
+                        </button>
+                        <button id="stopAudio" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600" disabled>
+                            <i class="fas fa-stop mr-2"></i>停止
+                        </button>
+                    </div>
+                    <div class="bg-white p-4 rounded-md">
+                        <p class="text-gray-700 mb-2">合成结果：</p>
+                        <audio id="audioPlayer" controls class="w-full"></audio>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html> 

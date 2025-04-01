@@ -1,0 +1,10 @@
+git+https://github.com/myshell-ai/OpenVoice.git 
+flask
+torch
+transformers
+vosk
+soundfile
+numpy
+librosa
+SentencePiece
+speechbrain
