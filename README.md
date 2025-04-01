@@ -94,6 +94,8 @@ models/
 python app.py
 ```
 
+![运行结果](imgs/success.png)
+
 8. 访问系统：
 打开浏览器访问 `http://localhost:5000`
 
