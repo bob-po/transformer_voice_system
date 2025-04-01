@@ -87,7 +87,7 @@ models/
    - 确保可以访问 HuggingFace Hub
    - 由于大部分加载模型是本地的，但是有些默认配置需要访问huggingface下载模型，无法直接访问本地
    
-   ![运行成功提示](warnings.png)
+   ![运行成功提示](imgs/warnings.png)
 
 7. 运行应用：
 ```bash
